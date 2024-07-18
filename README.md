@@ -1,18 +1,17 @@
 # ofx2csv
 Python script that converts .ofx and .qfx files to .csv
 
+# Installing
+
+This project relies on Poetry being installed on your system.
+
+```bash
+    poetry install
+```
 
 # Running
-
-1. Have Python 3 installed
-2. Install dependencies
-     ```bash
-     python3 -m venv .venv
-     source .venv/bin/activate
-     python3 -m pip install -r requirements.txt
-     ```
-4. Put the ofx files in the same folder as `ofx2csv.py`
-5. Do 
+1. Put the ofx files in the same folder as `ofx2csv.py`
+2. Do 
 
     ```bash
     python ofx2csv.py
