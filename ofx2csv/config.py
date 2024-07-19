@@ -81,3 +81,8 @@ class Config(metaclass=SingletonMeta):
 
     def field_order(self) -> list:
         return self.get_field_order()
+
+    def get_logging(self) -> dict:
+        if "logging" not in self.config["config"]:
+            return None
+        return self.config["config"]["logging"]

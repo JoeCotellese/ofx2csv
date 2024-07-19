@@ -11,6 +11,7 @@
 import argparse
 import json
 import logging
+import logging.config
 import pprint
 from csv import DictWriter
 from datetime import datetime
@@ -22,6 +23,16 @@ from ofxparse import OfxParser
 
 from .config import Config
 
+
+def setup_logging():
+    logging_config = Config().get_logging()
+    if logging_config:
+        logging.config.dictConfig(logging_config)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+
+setup_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -179,8 +190,8 @@ def get_positions_from_qfx(qfx: OfxParser):
 
 
 def save_files(table, outputtype, out_file):
+    logging.info(f"Save {outputtype} to {out_file}")
     if outputtype == "csv":
-        print("  Save to {}...".format(out_file))
         with out_file.open("w", newline="") as f:
             writer = DictWriter(f, fieldnames=table[0].keys(), extrasaction="ignore")
 
@@ -189,7 +200,6 @@ def save_files(table, outputtype, out_file):
                 writer.writerow(line)
 
     elif outputtype == "json":
-        print("  Save to {}...".format(out_file))
         with out_file.open("w") as f:
             json.dump(table, f)
 
@@ -225,10 +235,10 @@ def main():
     for input in args.input:
         files = glob(input)
         for qfx_file in files:
-            print("Reading {}...".format(qfx_file))
+            logging.info(f"Reading {qfx_file}...")
             qfx = OfxParser.parse(open(qfx_file, encoding="latin-1"))
             institution_name = get_institution_name(qfx)
-            print(f"Institution: {institution_name}")
+            logging.info(f"Institution: {institution_name}")
             statement = get_statement_from_qfx(qfx)
             save_files(
                 statement, outputtype, Path(qfx_file).with_suffix("." + outputtype)
