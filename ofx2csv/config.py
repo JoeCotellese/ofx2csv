@@ -69,9 +69,20 @@ class Config(metaclass=SingletonMeta):
 
     def match_payee(self, in_payee: str) -> str:
         for payee in self.get_payees():
-            print("payee: {}".format(payee))
             for pattern in payee["patterns"]:
-                print("pattern: {}".format(pattern))
                 if re.match(pattern, in_payee):
                     return payee["name"]
         return in_payee
+
+    def get_field_order(self) -> list:
+        if "field_order" not in self.config["config"]:
+            return []
+        return self.config["config"]["field_order"]
+
+    def field_order(self) -> list:
+        return self.get_field_order()
+
+    def get_logging(self) -> dict:
+        if "logging" not in self.config["config"]:
+            return None
+        return self.config["config"]["logging"]

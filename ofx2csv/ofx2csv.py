@@ -10,6 +10,8 @@
 
 import argparse
 import json
+import logging
+import logging.config
 import pprint
 from csv import DictWriter
 from datetime import datetime
@@ -20,6 +22,18 @@ from pathlib import Path
 from ofxparse import OfxParser
 
 from .config import Config
+
+
+def setup_logging():
+    logging_config = Config().get_logging()
+    if logging_config:
+        logging.config.dictConfig(logging_config)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 def myDir(obj):
@@ -93,7 +107,6 @@ def get_statement_from_qfx(qfx: OfxParser):
             line = {}
             for field in dir(account):
                 if not Config().allowed_field(field):
-                    print(f"Skipping field {field}")
                     continue
                 if not field.startswith("__") and field != ":":
                     val = getattr(account, field)
@@ -106,7 +119,6 @@ def get_statement_from_qfx(qfx: OfxParser):
 
             for field in dir(transaction):
                 if not Config().allowed_field(field):
-                    print(f"Skipping field {field}")
                     continue
                 if not field.startswith("__"):
                     val = getattr(transaction, field)
@@ -123,6 +135,7 @@ def get_statement_from_qfx(qfx: OfxParser):
 
             # if not statement: print("{}".format(line.keys()))
             # print("{}".format(line.values()))
+            line = reorder_fields(line)
             statement.append(line)
     return statement
 
@@ -170,13 +183,15 @@ def get_positions_from_qfx(qfx: OfxParser):
 
             # if not positions: print("{}".format(line.keys()))
             # print("{}".format(line.values()))
+            line = reorder_fields(line)
+            logger.info("Appending position to list")
             positions.append(line)
     return positions
 
 
 def save_files(table, outputtype, out_file):
+    logging.info(f"Save {outputtype} to {out_file}")
     if outputtype == "csv":
-        print("  Save to {}...".format(out_file))
         with out_file.open("w", newline="") as f:
             writer = DictWriter(f, fieldnames=table[0].keys(), extrasaction="ignore")
 
@@ -185,7 +200,6 @@ def save_files(table, outputtype, out_file):
                 writer.writerow(line)
 
     elif outputtype == "json":
-        print("  Save to {}...".format(out_file))
         with out_file.open("w") as f:
             json.dump(table, f)
 
@@ -202,6 +216,14 @@ def get_institution_name(qfx: OfxParser):
     return institution_name
 
 
+def reorder_fields(spreadsheet_line: dict) -> dict:
+    logger.info("Reordering fields")
+    field_order = Config().get_field_order()
+
+    ordered_line = {key: spreadsheet_line[key] for key in field_order}
+    return ordered_line
+
+
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument("-o", "--outputtype", help="csv or json", default="csv")
@@ -213,10 +235,10 @@ def main():
     for input in args.input:
         files = glob(input)
         for qfx_file in files:
-            print("Reading {}...".format(qfx_file))
+            logging.info(f"Reading {qfx_file}...")
             qfx = OfxParser.parse(open(qfx_file, encoding="latin-1"))
             institution_name = get_institution_name(qfx)
-            print(f"Institution: {institution_name}")
+            logging.info(f"Institution: {institution_name}")
             statement = get_statement_from_qfx(qfx)
             save_files(
                 statement, outputtype, Path(qfx_file).with_suffix("." + outputtype)
