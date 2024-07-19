@@ -1,0 +1,24 @@
+config:
+  ignored_fields:
+    - branch_id
+    - mcc
+    - memo
+    - curdef
+
+  payees:
+    - name: "Wawa"
+      patterns:
+        - "^WAWA.*"
+    - name: "Amazon"
+      patterns:
+        - "^AMAZON.*"
+        - "PwP\\s+AMAZON\\s+MKTP\\s+Privacycom"
+    - name: "Weiss Markets"
+      patterns:
+        - '(?i)\bWEIS\s+MARKETS\b'
+    - name: "CVS Pharmacy"
+      patterns:
+        - "CVS/PHARM.*"
+    - name: "Spotify"
+      patterns:
+        - 'SPOTIFY\s+USA'
