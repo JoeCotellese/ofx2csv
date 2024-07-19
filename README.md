@@ -8,6 +8,18 @@ This project relies on Poetry being installed on your system.
 ```bash
     poetry install
 ```
+# Configuration
+
+Configuration is handled via the yaml file. Copy the config.yml.example to config.yml.
+
+## Fields
+
+You can configure the fields to skip and the field order for the output file.
+
+## Renaming payees
+
+You can also rename payees based on regular expressions. See the config file for examples.
+
 
 # Running
 1. Put the ofx files in the same folder as `ofx2csv.py`
