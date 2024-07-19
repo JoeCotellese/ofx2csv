@@ -184,6 +184,15 @@ def save_files(table, outputtype, out_file):
         print("{} type unsupported".format(outputtype))
 
 
+def get_institution_name(qfx: OfxParser):
+    institution_name = ""
+    try:
+        institution_name = qfx.account.institution.organization
+    except:
+        instituation_name = qfx.account.insitution.fid
+    return institution_name
+
+
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument("-o", "--outputtype", help="csv or json", default="csv")
@@ -198,6 +207,8 @@ def main():
         for qfx_file in files:
             print("Reading {}...".format(qfx_file))
             qfx = OfxParser.parse(open(qfx_file, encoding="latin-1"))
+            institution_name = get_institution_name(qfx)
+            print(f"Institution: {institution_name}")
             statement = get_statement_from_qfx(qfx)
             save_files(
                 statement, outputtype, Path(qfx_file).with_suffix("." + outputtype)
