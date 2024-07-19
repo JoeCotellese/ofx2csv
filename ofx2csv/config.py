@@ -13,9 +13,18 @@ config:
         - mcc
         - memo
         - curdef
+    payees:
+        - name: "Wawa"
+        patterns:
+            - "^WAWA.*"
+        - name: "Amazon"
+        patterns:
+            - "^AMAZON.*"
+
 """
 
 import logging
+import re
 
 import yaml
 
@@ -52,3 +61,17 @@ class Config(metaclass=SingletonMeta):
 
     def allowed_field(self, field: str) -> bool:
         return field not in self.get_ignored_fields()
+
+    def get_payees(self) -> list:
+        if "payees" not in self.config["config"]:
+            return []
+        return self.config["config"]["payees"]
+
+    def match_payee(self, in_payee: str) -> str:
+        for payee in self.get_payees():
+            print("payee: {}".format(payee))
+            for pattern in payee["patterns"]:
+                print("pattern: {}".format(pattern))
+                if re.match(pattern, in_payee):
+                    return payee["name"]
+        return in_payee

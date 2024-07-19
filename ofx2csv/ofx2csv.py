@@ -112,6 +112,8 @@ def get_statement_from_qfx(qfx: OfxParser):
                     val = getattr(transaction, field)
                     if field == "security":
                         val = secId2Name[val]
+                    if field == "payee":
+                        val = Config().match_payee(val)
                     if isinstance(val, str):
                         line[field] = val
                     if isinstance(val, Decimal):
