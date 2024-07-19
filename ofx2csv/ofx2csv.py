@@ -19,6 +19,8 @@ from pathlib import Path
 
 from ofxparse import OfxParser
 
+from .config import Config
+
 
 def myDir(obj):
     items = []
@@ -89,8 +91,10 @@ def get_statement_from_qfx(qfx: OfxParser):
     for account in qfx.accounts:
         for transaction in account.statement.transactions:
             line = {}
-
             for field in dir(account):
+                if not Config().allowed_field(field):
+                    print(f"Skipping field {field}")
+                    continue
                 if not field.startswith("__") and field != ":":
                     val = getattr(account, field)
                     if isinstance(val, str):
@@ -101,6 +105,9 @@ def get_statement_from_qfx(qfx: OfxParser):
                         line[field] = val.strftime("%m/%d/%Y")
 
             for field in dir(transaction):
+                if not Config().allowed_field(field):
+                    print(f"Skipping field {field}")
+                    continue
                 if not field.startswith("__"):
                     val = getattr(transaction, field)
                     if field == "security":
@@ -200,7 +207,6 @@ def main():
         "-i", "--input", nargs="+", help="input file(s)", default=["*.qfx"]
     )
     args = argparser.parse_args()
-
     outputtype = args.outputtype
     for input in args.input:
         files = glob(input)

@@ -1,0 +1,6 @@
+config:
+  ignored_fields:
+    - branch_id
+    - mcc
+    - memo
+    - curdef
